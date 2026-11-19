@@ -1,0 +1,9 @@
+{
+  "event_id": "EDUCATIONAL-EXAMPLE-001",
+  "units": {"momentum": "GeV", "mass": "GeV", "phi": "radians"},
+  "particles": [
+    {"id":"mu-1","name":"Muon","pt":42.1,"eta":0.42,"phi":0.75,"mass":0.105658,"charge":-1},
+    {"id":"mu+1","name":"Muon","pt":39.7,"eta":-0.38,"phi":-2.31,"mass":0.105658,"charge":1},
+    {"id":"jet-1","name":"Jet","pt":28.4,"eta":1.12,"phi":2.62,"mass":8.5,"charge":0}
+  ]
+}

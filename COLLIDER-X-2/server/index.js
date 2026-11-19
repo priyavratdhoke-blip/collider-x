@@ -1,0 +1,8 @@
+import express from 'express';
+import cors from 'cors';
+const app=express(); app.use(cors()); app.use(express.json({limit:'20mb'}));
+const BASE='https://opendata.cern.ch/api/records';
+app.get('/api/health',(_,res)=>res.json({ok:true,service:'COLLIDER X CERN data bridge',upstream:BASE}));
+app.get('/api/cern/search',async(req,res)=>{try{const q=String(req.query.q||'CMS collision events').slice(0,240);const size=Math.min(20,Math.max(1,Number(req.query.size)||10));const url=new URL(BASE+'/');url.searchParams.set('q',q);url.searchParams.set('size',String(size));const r=await fetch(url,{headers:{'Accept':'application/json'},signal:AbortSignal.timeout(25000)});if(!r.ok)throw new Error(`CERN returned ${r.status}`);const j=await r.json();res.json({hits:(j.hits?.hits||[]).map(x=>({id:x.id,title:x.metadata?.title||'Untitled record',description:x.metadata?.description||'',doi:x.pids?.doi?.identifier||x.metadata?.doi||'',date:x.metadata?.publication_date||'',type:x.metadata?.resource_type?.title||'',experiment:x.metadata?.experiment?.[0]?.title||'',files:(x.files||[]).map(f=>({key:f.key,size:f.size,checksum:f.checksum,links:f.links})) ,links:x.links})) ,total:j.hits?.total||0,query:q,source:'CERN Open Data Portal'});}catch(e){res.status(502).json({error:e.message,source:'CERN Open Data Portal'});}});
+app.get('/api/cern/record/:id',async(req,res)=>{try{const id=encodeURIComponent(req.params.id);const r=await fetch(`${BASE}/${id}`,{headers:{'Accept':'application/json'},signal:AbortSignal.timeout(25000)});if(!r.ok)throw new Error(`CERN returned ${r.status}`);res.json(await r.json());}catch(e){res.status(502).json({error:e.message});}});
+app.listen(8787,()=>console.log('COLLIDER X data bridge listening on http://localhost:8787'));
